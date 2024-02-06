@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import net.k3nder.game.levels;
 final Properties propiedades = new Properties();
 
-public static final File DEFAULT_CONFIG_FILE = new File("C:/Users/krist/Desktop/valuable_frill/data/conf.default.properties");
-public static final File DEFAULT_LEVELS_CONFIG = new File("C:/Users/krist/Desktop/valuable_frill/data/game/levels/levels.json");
+public static final File DEFAULT_CONFIG_FILE = new File("C:/Users/krist/Desktop/spaceinvaders/data/conf.default.properties");
+public static final File DEFAULT_LEVELS_CONFIG = new File("C:/Users/krist/Desktop/spaceinvaders/data/game/levels/levels.json");
 public static Boolean IsWin = false;
 // true suma i false resta
 public static Boolean DirectionNave = false;
@@ -119,7 +119,6 @@ class bala{
     onTouch = run;
   }
   public bala(jugador jugador){
-    int BALA_MAXIMUM_SIZE = Integer.parseInt(propiedades.getProperty("bala.maximum.size"));
     WIDTH = jugador.getWIDTH()+2;
     WIDTH2 = 3;
     HEIGHT = jugador.getHEIGHT();
@@ -131,6 +130,9 @@ class bala{
   }
   public void move(float velocity){
     int BALA_MAXIMUM_DISTANCE = Integer.parseInt(propiedades.getProperty("bala.maximum.distance"));
+    moveBala(BALA_MAXIMUM_DISTANCE);
+  }
+  private void moveBala(int BALA_MAXIMUM_DISTANCE,float velocity) {
     boolean breaker = false;
     for(int i = 0;i <= BALA_MAXIMUM_DISTANCE;i++){
       if(breaker) break;
@@ -161,7 +163,6 @@ class bala{
       HEIGHT2 -= velocity;
       //update();
     }
-    
   }
   private void verifyWin(){
      boolean totaldelated = true;
@@ -270,17 +271,14 @@ void setup(){
   float NAVE_DEFAULT_SIZE = Float.parseFloat(propiedades.getProperty("nave.default.size"));
 
   // poner las naves 
-  for(Nave nave : Naves){
-     
-  }
+  Naves.stream().forEach(Nave -> println(Nave));
   jugador = new jugador(width/2,(height)-(PLAYER_BOTTOM_DISTANCE));
   println("setup finish");
 }
 void draw(){
   float velocity = Integer.parseInt(propiedades.getProperty("nave.velocity"));
-  for(bala b : jugador.getBalas()){
-    b.update();
-  }
+  jugador.getBalas().stream()
+    .forEach(bala -> bala.update());  
   for(Nave nave : Naves){
     if(nave.isInBorder()){
         println("is in border: "+velocity);
@@ -288,55 +286,53 @@ void draw(){
         velocity += -velocity;
         break;
     }
-    nave.move(velocity);
+    //nave.move(velocity);
   }
-
 }
 
 // detectar las teclas
 void keyPressed() {
   println("key presed");
   float PLAYER_STEPS = Float.parseFloat(propiedades.getProperty("player.steps"));
-  // mira si esta disponible en coded
-  if (key == CODED) {
-    // si se presiona derecha
-    if (keyCode == LEFT) {
-      // mover a la derecha
+  if (key == CODED || keyCode == LEFT) {
       println(PLAYER_STEPS);
       jugador.move(-PLAYER_STEPS);
-      
-      // si se presiona izquierda
-    } else if (keyCode == RIGHT) {
-      // mover a la izquierda
-      jugador.move(PLAYER_STEPS);
-    } 
-    // si se presiona espacio
-  } else if(key == ' '){
-    //println("space");
-    // disparar
+   } else if (key == CODED || keyCode == RIGHT) {
+     jugador.move(PLAYER_STEPS);
+   } else if(key == ' '){
     jugador.disparar();
   }
   println("event close");
 
 }
-public Nave NinstnceOf(nave n){
+public Nave NaveConvertedOf(nave n){
     return new Nave(n.x,n.y,n.x_size,n.y_size);
 }
 List<levels> Levels = new ArrayList<levels>();
 void generateNaves(){
+  loadLevels();
+  for(levels Level : Levels){
+    getLevelNaves(Level).stream()
+      .forEach(nave -> Naves.add(NaveConvertedOf(nave)));
+  }
+  println(Levels.get(0));
+}
+private void loadLevels(){
   try{
     ConfigFile config = new ConfigFile(DEFAULT_LEVELS_CONFIG);
     List<levels> levels = config.getArrayList("levels",levels.class);
     Levels = levels;
-    for(levels Level : levels){
-      ConfigFile LevelConfig = new ConfigFile(new File("C:/Users/krist/Desktop/valuable_frill/data/game/levels",Level.LevelFile));
-      List<nave> naves = LevelConfig.getArrayList("naves",nave.class);
-      
-      for(nave nav : naves) Naves.add(NinstnceOf(nav));
-      
-    }
-    println(levels.get(0));
   } catch(IOException | IllegalAccessException | InstantiationException e){
     e.printStackTrace();
   }
+}
+private List<nave> getLevelNaves(levels Level){
+  List<nave> result = new ArrayList<nave>();
+  try{
+    ConfigFile LevelConfig = new ConfigFile(new File("C:/Users/krist/Desktop/spaceinvaders/data/game/levels",Level.LevelFile));
+    result = LevelConfig.getArrayList("naves",nave.class);
+  } catch(IOException | IllegalAccessException | InstantiationException e){
+    e.printStackTrace();
+  }
+  return result;
 }
