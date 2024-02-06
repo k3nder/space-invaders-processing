@@ -31,16 +31,16 @@ con el numbre de la configuracion, el valor que se le tiene que dar, el valor pr
 |nave.separation|numero|10|es la separacion que tienen las naves entre si|
 |nave.default.size|numero|20|es el tamaño que tienen las naves, en pixeles|
 |nave.velocity|numero|1|es la velocidad a la que se mueven las naves|
-|
+|||||
 |player.bottom.distance|numero|16|distancia a la que se encuntra el jugador de la parte de abajo de la pantalla|
 |player.size|numero|10|tamaño del jugador|
 |player.steps|numero|5|tamaño de los pasos del jugador|
-|
+|||||
 |pane.size|numero|900|tamaño del panel del juego|
-|
+|||||
 |array.column.size|numero|3|numero de culumnas de naves que hay|
 |array.line.size|numero|10|numero de lineas de naves que hay|
-|
+|||||
 |bala.maximum.distance|numero|3|distancia maxima de una bala|
 
 El archvo de configuracion se encuentra en la carpeta data
