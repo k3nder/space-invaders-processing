@@ -1,6 +1,6 @@
 # Como se juega?
 ## la descripcion
-El juego se basa en que hay un jugador que le dispara a naves eneigas, el jugador se mueve con las flechas del teclado izquiera i derecha i dispara con el espacio, el jugador gana cuando le alla disparado a todas las naves.
+El juego se basa en que hay un jugador que le tiene que dispara a naves enemigas, el jugador se mueve con las flechas del teclado izquiera i derecha i dispara con el espacio, el jugador gana cuando le alla disparado a todas las naves.
 
 Por el contrario las naves enemigas se agupan en filas, i se mueven para los lados, cuando una de las naves enemigas toca un borde, todas las naves que hay se mueven para abajo, cuando
 una nave llege al jugador, el jugador abra perdido
@@ -21,26 +21,26 @@ Las naves pueden ganar si al disparale al juagdor le dan i se le acaban las vida
 
 # Archivos de configuracion de Propiedades
 ## Que es?
-El archvivo de configuracion de propiedades es un archivo que define las propiedades del jugador i i de las naves, propiedades simples i predeterminadas, este archvio es `conf.default.properties` este archivo esta echo para hacer pruebas i no para hacer el juago mas sencillo.
+El archvivo de configuracion de propiedades es un archivo que define las propiedades del jugador i i de las naves, propiedades simples i predeterminadas, este archvio es `conf.default.properties` este archivo esta echo para hacer pruebas i no para hacer el juego mas sencillo.
 ## Como se usa?
-este archivo tiene dicerentes propiedades i es muy facil de configurar, aqui esta la tabla
-con el numbre de la configuracion, el valor que se le tiene que dar, el valor predeterminado que hay i la desciption de que hace:
+este archivo tiene diferentes propiedades i es muy facil de configurar, aqui esta la tabla
+con el nombre de la configuracion, el valor que se le tiene que dar, el valor predeterminado que hay i la descripción de que hace:
 
 |nombre|tipo de valor|valor predeterminado|descripcion|
 |------|-------------|--------------------|-----------|
 |nave.separation|numero|10|es la separacion que tienen las naves entre si|
 |nave.default.size|numero|20|es el tamaño que tienen las naves, en pixeles|
 |nave.velocity|numero|1|es la velocidad a la que se mueven las naves|
-|
+|||||
 |player.bottom.distance|numero|16|distancia a la que se encuntra el jugador de la parte de abajo de la pantalla|
 |player.size|numero|10|tamaño del jugador|
 |player.steps|numero|5|tamaño de los pasos del jugador|
-|
+|||||
 |pane.size|numero|900|tamaño del panel del juego|
-|
-|array.column.size|numero|3|numero de culumnas de naves que hay|
+|||||
+|array.column.size|numero|3|numero de columnas de naves que hay|
 |array.line.size|numero|10|numero de lineas de naves que hay|
-|
+|||||
 |bala.maximum.distance|numero|3|distancia maxima de una bala|
 
 El archvo de configuracion se encuentra en la carpeta data
