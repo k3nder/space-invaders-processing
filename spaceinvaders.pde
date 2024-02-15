@@ -34,19 +34,19 @@ public class Nave {
 
   public Nave() {}
 
-  public float getX() {
+  public int getX() {
     return x;
   }
 
-  public float getY() {
+  public int getY() {
     return y;
   }
 
-  public float getXSIZE() {
+  public int getXSIZE() {
     return x_size;
   }
 
-  public float getYSIZE() {
+  public int getYSIZE() {
     return y_size;
   }
 
@@ -65,11 +65,11 @@ public class Nave {
   private void clean() {
     noStroke();
     fill(204, 204, 204);
-    rect(x, y, x_size, y_size);
+    rect(x, y, x_size + 2, y_size+ 2);
   }
 
   public boolean isInBorder() {
-    if (x + x_size > width || x < 0) {
+    if (x + (x_size + 2) > width || (2 + x) < 0) {
       return true;
     }
     return false;
@@ -83,24 +83,21 @@ public class Nave {
     rect(x, y, x_size + 2, y_size + 2);
   }
 
-  public void move(float velocity) {
+  public void move(int velocity,int y_) {
     clean();
     x += velocity;
-
-    // Verifica si la nave está fuera de los bordes
-    if (isInBorder()) {
-      // Mueve la nave al otro lado
-      if (x > width) {
-        x = -x_size;
-      } else {
-        x = width;
-      }
-    }
-
-    // Dibuja la nave en la nueva posición
+    this.y = y_;
+    println(velocity, y_ , y, x);
     stroke(1.0);
     fill(299, 9, 9);
-    rect(x, y, x_size + 2, y_size + 2);
+    rect(x, y, x_size, y_size);
+  }
+  public void move(int velocity) {
+    clean();
+    x += velocity;
+    stroke(1.0);
+    fill(299, 9, 9);
+    rect(x, y, x_size, y_size);
   }
 }
 
@@ -130,7 +127,7 @@ class bala{
   }
   public void move(float velocity){
     int BALA_MAXIMUM_DISTANCE = Integer.parseInt(propiedades.getProperty("bala.maximum.distance"));
-    moveBala(BALA_MAXIMUM_DISTANCE);
+    moveBala(BALA_MAXIMUM_DISTANCE,1.0);
   }
   private void moveBala(int BALA_MAXIMUM_DISTANCE,float velocity) {
     boolean breaker = false;
@@ -139,8 +136,8 @@ class bala{
       ListIterator<Nave> iterator = Naves.listIterator(Naves.size());
       while(iterator.hasPrevious()){
         Nave navee = iterator.previous();
-        float Heigth = navee.getX();
-        float Height1 = navee.getXSIZE();
+        int Heigth = navee.getX();
+        int Height1 = navee.getXSIZE();
         println("bala:WIDTH: " + WIDTH);
         println("nave:WIDTH: " + Heigth);
         println("nave:WIDTH2: " + Height1);
@@ -177,7 +174,7 @@ class bala{
           text("WIN", 40, 120);
       }
   }
-  private boolean isInRadius(float num1,float num2) {
+  private boolean isInRadius(int num1,int num2) {
         return WIDTH >= num1 && WIDTH <= num2;  
   }
   public void clean(){
@@ -252,7 +249,7 @@ void settings(){
 }
 
 
-
+int velocity;
 // el jugador principal
 jugador jugador;
 void setup(){
@@ -263,6 +260,7 @@ void setup(){
     println("error IO");
     System.exit(10);
   }
+  velocity = Integer.parseInt(propiedades.getProperty("nave.velocity"));
   generateNaves();
   float PLAYER_BOTTOM_DISTANCE = Float.parseFloat(propiedades.getProperty("player.bottom.distance"));
   int ARRAY_COLUMN_SIZE = Integer.parseInt(propiedades.getProperty("array.column.size"));
@@ -276,24 +274,23 @@ void setup(){
   println("setup finish");
 }
 void draw(){
-  float velocity = Integer.parseInt(propiedades.getProperty("nave.velocity"));
   jugador.getBalas().stream()
     .forEach(bala -> bala.update());  
   for(Nave nave : Naves){
+    if(nave.isDeleted()) continue;
     if(nave.isInBorder()){
         println("is in border: "+velocity);
-        //DirectionNave = (DirectionNave ? false : true);
-        velocity += -velocity;
-        break;
+        velocity = -velocity;
+        Naves.stream().forEach(Nave -> Nave.move(0,Nave.getY()+10));
     }
-    //nave.move(velocity);
+    nave.move(velocity);
   }
 }
 
 // detectar las teclas
 void keyPressed() {
   println("key presed");
-  float PLAYER_STEPS = Float.parseFloat(propiedades.getProperty("player.steps"));
+  int PLAYER_STEPS = Integer.parseInt(propiedades.getProperty("player.steps"));
   if (key == CODED || keyCode == LEFT) {
       println(PLAYER_STEPS);
       jugador.move(-PLAYER_STEPS);
