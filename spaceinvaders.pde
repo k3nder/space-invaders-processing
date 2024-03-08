@@ -60,6 +60,11 @@ void setup() {
   println("setup finish"); 
 }
 void draw() {
+  /*
+  NOTE: se pensaba que la detecoion de si una bala toca una nave fallaba, i que eso generaba el error de un game.over temprano, pero se descubrio que no es un error
+  i que lo que lo estaba generando es el limite de 600
+  */
+  if(game.pause) return;
   if(jugador.isDeleted()) game.over();
   Random rand = new Random();
 
@@ -68,7 +73,6 @@ void draw() {
   if(!(n > Naves.size()-1)) Naves.get(n).disparar();
   
   //logger.info("velocity: " + velocity);
-  if(game.pause) return;
   noStroke();
   fill(204, 204, 204);
   rect(502, 140,400,-100);
