@@ -76,7 +76,7 @@ public class Bala extends MovibleObject{
   @Override
   public void update() {
     clean();
-    Increase(Position.Y_AND_SIZE, (direct == Direction.BOTTOM ? 10 : -10 ));
+    Increase(Position.Y, (direct == Direction.BOTTOM ? 10 : -10 ));
     move(1);
     show();
   }
