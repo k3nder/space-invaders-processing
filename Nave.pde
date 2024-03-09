@@ -1,5 +1,5 @@
 public class Nave extends MovibleObject{
-  private List<Bala> balas = new ArrayList<>();
+  protected List<Bala> balas = new ArrayList<>();
   public Nave(int x, int y, int x_size, int y_size) {
     this.y = y;
     this.x = x;
@@ -57,10 +57,6 @@ public class Nave extends MovibleObject{
     rect(x, y, x_size, y_size);
   }
   public void move(int velocity) {
-    clean();
-    x += velocity;
-    stroke(1.0);         
-    fill(299, 9, 9);
-    rect(x, y, x_size, y_size);
+    move(velocity, y);
   }
 }

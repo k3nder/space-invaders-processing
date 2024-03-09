@@ -1,8 +1,10 @@
-{
-    "levels":[
+[
         {
           "LevelFile":"level.1.json",
           "level": 1
+        },
+        {
+          "LevelFile":"level.2.json",
+          "level":2
         }
-    ]
-}
+      ]

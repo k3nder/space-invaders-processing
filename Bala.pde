@@ -1,6 +1,6 @@
 public class Bala extends MovibleObject{
   private boolean playerVulnerable = false;
-  private boolean delated;
+  private boolean hyper = false;
   private int relay = 5;
   private Direction direct = Direction.TOP;
   private Runnable onTouch = () -> {
@@ -19,40 +19,38 @@ public class Bala extends MovibleObject{
   public void setDirection(Direction direct){
     this.direct = direct;
   }
-  public void move(int velocity) {
+  public void move() {
     int BALA_MAXIMUM_DISTANCE = Integer.parseInt(propiedades.getProperty("bala.maximum.distance"));
-    moveBala(BALA_MAXIMUM_DISTANCE, velocity);
+    moveBala(BALA_MAXIMUM_DISTANCE);
   }
-  private void moveBala(int BALA_MAXIMUM_DISTANCE, int velocity) {
+  private void moveBala(int BALA_MAXIMUM_DISTANCE) {
     boolean breaker = false;
     for (int i = 0; i <= BALA_MAXIMUM_DISTANCE; i++) {
       // TODO
       if (breaker) break;
-      println("verify vulnerable: ", playerVulnerable);
       if(playerVulnerable){
-        println("player vulnerable");
         verifyNaveTouched(jugador);
       } else {
-        println("nave vulnerable");
         Naves.stream().forEach(Nave -> verifyNaveTouched(Nave));
       }
       verifyWin();
-      clean();
-      y -= velocity;
-      y_size -= velocity;
     }
   }
-  public boolean isOutOfMap(){
-    if(x <= 0) return true;
-    return false;
+  public void hyperBala(){
+    hyper=true;
   }
   private Boolean verifyNaveTouched(MovibleObject nav) {
+    if(delete){  return false;} 
     // si la nave ya esta eliminada, pasar a otra
     if (nav.isDeleted()) return false;
     if (isInRadius(nav)) {
       logger.debug("touched");
       onTouch.run();
+      println("for touch of", this);
       nav.delete();
+      if(hyper) {nav.delete(); nav.delete();}
+      this.delete();
+      this.clean();
       return true;
     }
     return false;
@@ -67,8 +65,22 @@ public class Bala extends MovibleObject{
       game.win();
     }
   }
+  private boolean isOut(){
+    return (between(y, 0, width));
+  }
   private boolean isInRadius(MovibleObject nav) {
-    return (x >= nav.getX() && x <= (nav.getXSIZE() + nav.getX())) && (y >= nav.getY());
+    //println("test", 40, 100, 0, between(40,0,100));
+    //println("x", x, nav.getX(), (nav.getX() + nav.getXSIZE()), between(x, nav.getX(), (nav.getX() + nav.getXSIZE())));
+    //println("y", y, nav.getY(), (nav.getY() + nav.getYSIZE()), between(y, nav.getY(), (nav.getY() + nav.getYSIZE())));
+    return (between(x, nav.getX(), (nav.getX() + nav.getXSIZE())) && between(y, nav.getY(), (nav.getY() + nav.getYSIZE())));
+    //return (x >= nav.getX() && x <= (nav.getXSIZE() + nav.getX())) && (((y <= nav.getY() + nav.getYSIZE())));
+  }
+  private boolean between(int valor, int pnt1, int pnt2){
+    int p1 = (pnt1 < pnt2 ? pnt1 : pnt2);
+    int p2 = (pnt1 > pnt2 ? pnt1 : pnt2);
+   // println("nimor",p1,"major",p2);
+    //println((p1 >= valor), (p2 <= valor));
+    return (!(p1 >= valor) && !(p2 <= valor));
   }
   public void playerVulnerable(){
     playerVulnerable = true;
@@ -77,14 +89,18 @@ public class Bala extends MovibleObject{
   public void update() {
     clean();
     Increase(Position.Y, (direct == Direction.BOTTOM ? 10 : -10 ));
-    move(1);
+    if(hyper) fill(255, 147, 0);
     show();
+     move();
+    if (!isOut()) {
+      println("clean", this);
+      this.clean();
+      this.delete();
+    }
   }
-  public boolean isDelated(){
-    return delated;
-  }
-  public void delete(){
-    delated = true;
-    clean();
+  @Override
+  public void show(){
+    println("showing", this);
+    super.show();
   }
 }

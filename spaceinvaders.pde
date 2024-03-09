@@ -4,22 +4,16 @@ import java.io.FileWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import net.kender.Kjson.ConfigFile;
-import net.k3nder.game.nave;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import net.k3nder.game.levels;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.util.Random;
 final Properties propiedades = new Properties();
 
-public static final File DEFAULT_CONFIG_FILE = new File("C:/Users/krist/Desktop/spaceinvaders/data/conf.default.properties");
+public static File DEFAULT_CONFIG_FILE = new File("C:/Users/krist/Desktop/spaceinvaders/data/conf.default.properties");
 public static final File DEFAULT_LEVELS_CONFIG = new File("C:/Users/krist/Desktop/spaceinvaders/data/game/levels/levels.json");
 public static Boolean IsWin = false;
 // true suma i false resta
 public static Boolean DirectionNave = false;
-public static levels level;
 public static Log logger = LogFactory.getLog("GAME");
 
 List<Nave> Naves = new ArrayList<Nave>();
@@ -43,6 +37,7 @@ private void loadPropertiesFile(){
 
 int velocity;
 int down_velocity;
+int fpst;
 // el jugador principal
 Player jugador;
 
@@ -52,39 +47,60 @@ void setup() {
   loadPropertiesFile();
   velocity = Integer.parseInt(propiedades.getProperty("nave.velocity"));
   down_velocity = Integer.parseInt(propiedades.getProperty("nave.down.velocity"));
-  generateNaves();
+  game.generateNaves();
   int PLAYER_BOTTOM_DISTANCE = Integer.parseInt(propiedades.getProperty("player.bottom.distance"));
   // poner las naves
   Naves.stream().forEach(Nave -> println(Nave));
   jugador = new Player(width/2, (height)-(PLAYER_BOTTOM_DISTANCE));
+  nodriz = new Nodriza(50);
+  Naves.add(nodriz);
   println("setup finish"); 
 }
+int fpstn;
+Nodriza nodriz;
 void draw() {
   /*
   NOTE: se pensaba que la detecoion de si una bala toca una nave fallaba, i que eso generaba el error de un game.over temprano, pero se descubrio que no es un error
-  i que lo que lo estaba generando es el limite de 600
+  i que lo que lo estaba generando es el limite de 600...
   */
   if(game.pause) return;
-  if(jugador.isDeleted()) game.over();
-  Random rand = new Random();
+  if(jugador.isDeleted() || jugador.getLives() == 0) game.over();
+  game.addStatus("vidas", jugador.getLives());
+  game.addStatus("balas", jugador.getBalasRest());
+  game.addStatus("level", game.levelIndex + 1);
+  jugador.update();
+  fpst++;
+  fpstn++;
+  if(!(fpstn < 40) && (!nodriz.isDeleted())) {nodriz.disparar(); fpstn=0;}
 
-  // Obtain a number between [0 - 49].
-  int n = rand.nextInt(Naves.size()*40);
-  if(!(n > Naves.size()-1)) Naves.get(n).disparar();
+  Random rand = new Random();
+  int n = rand.nextInt(Naves.size()*(Integer.parseInt(propiedades.getProperty("nave.bala.probablity"))));
+  if(!(n > Naves.size()-1)) if(!Naves.get(n).isDeleted()) Naves.get(n).disparar();
   
   //logger.info("velocity: " + velocity);
-  noStroke();
-  fill(204, 204, 204);
-  rect(502, 140,400,-100);
-  fill(204, 204, 255);
-  stroke(1.0);
-  textSize(128);
-  text(frameRate , 500, 120);
+  int iterator_statuses = 1;
+  for(java.util.Map.Entry<String, String> entry : game.statuses.entrySet()){
+    String key = entry.getKey();
+    String value = entry.getValue();
+    Text text = new Text(60, iterator_statuses*100);
+    text.clean();
+    text.show(key + " " + value);
+    iterator_statuses++;
+  }
+  if(game.showFPS){
+    noStroke();
+    fill(204, 204, 204);
+    rect(502, 140,400,-100);
+    fill(204, 204, 255);
+    stroke(1.0);
+    textSize(128);
+    text(frameRate , 500, 120);
+  } 
   // cargar todas las balas
-  jugador.getBalas().stream().filter(Bala -> !Bala.isDelated())
+  jugador.getBalas().stream().filter(Bala -> !Bala.isDeleted())
     .forEach(bala -> bala.update());
   for(Nave nav : Naves){
-     nav.getBalas().stream().filter(Bala -> !Bala.isDelated())
+     nav.getBalas().stream().filter(Bala -> !Bala.isDeleted())
       .forEach(Bala -> Bala.update());
   }
   // carga i actualiza todas las naves, mira si hay una en el borde
@@ -97,7 +113,7 @@ void draw() {
     }
   }
   Naves.stream().filter(Nave -> !Nave.isDeleted()).forEach(Nave -> {
-    if(Nave.getY() > 600) game.over();
+    if(Nave.getY() > Integer.parseInt(propiedades.getProperty("game.over.to.ymin"))) game.over();
   });
   Naves.stream().filter(Nave -> !Nave.isDeleted()).forEach(Nave -> Nave.move(velocity));
 }
@@ -106,6 +122,15 @@ void draw() {
 void keyPressed() {
   if(key == 'p'){
     game.changePause();
+    return;
+  }
+  if (key == ' ') {
+    if(game.pause) {
+      if(IsWin) game.nextLevel();
+      else game.restart();
+      return;
+    }
+    jugador.disparar();;
   }
   if(game.pause) return;
   println("key presed");
@@ -118,51 +143,39 @@ void keyPressed() {
     jugador.clean();
     jugador.Increase(Position.X,PLAYER_STEPS);
     jugador.show();
-  } else if (key == ' ') {
-    jugador.disparar();
-  } else if (key == 'n') {
-    if(!game.devtools) return;
-    Naves.stream().filter(Nave -> !Nave.isDeleted()).forEach(Nave -> Nave.disparar());
+  } else if(key == 'f') {
+    game.showFPS = !game.showFPS;
+    if(!game.showFPS){
+      noStroke();
+      fill(204, 204, 204);
+      rect(502, 140,400,-100);
+      stroke(1);
+    }
   }
+  if(game.devtools){
+    println("game tools on");
+    if (key == 'n') {
+      if(!game.devtools) return;
+      Naves.stream().filter(Nave -> !Nave.isDeleted()).forEach(Nave -> Nave.disparar());
+    } else if(key == 'w'){
+      game.win();
+    } else if(key == 'o'){
+      game.over();
+    } else if(key == 'i'){
+      // hacer el jugadopr invulnerable
+    } else if(key == 'l'){
+      game.nextLevel();
+    } else if(key == 'k'){
+      game.previusLevel();
+    } else if(key == 'm'){
+     jugador.setPlayerBalasDelay(0);
+    } else if(key == 'z'){
+      jugador.setMaximumBalas(Integer.MAX_VALUE);
+    }
+  } 
   println("event close");
 }
-// parser de nave a Nave
-public Nave NaveConvertedOf(nave n) {
-  return new Nave(n.x, n.y, n.x_size, n.y_size);
-}
-// carga todos los nives i las naves
-List<levels> Levels = new ArrayList<levels>();
-void generateNaves() {
-  loadLevels();
-  for (levels Level : Levels) {
-    getLevelNaves(Level).stream()
-      .forEach(nave -> Naves.add(NaveConvertedOf(nave)));
-  }
-  println(Levels.get(0));
-}
-// carga los niveles
-private void loadLevels() {
-  try {
-    ConfigFile config = new ConfigFile(DEFAULT_LEVELS_CONFIG);
-    List<levels> levels = config.getArrayList("levels", levels.class);
-    Levels = levels;
-  }
-  catch(IOException | IllegalAccessException | InstantiationException e) {
-    e.printStackTrace();
-  }
-}
-// carga todas las naves de los niveles 
-private List<nave> getLevelNaves(levels Level) {
-  List<nave> result = new ArrayList<nave>();
-  try {
-    ConfigFile LevelConfig = new ConfigFile(new File("C:/Users/krist/Desktop/spaceinvaders/data/game/levels", Level.LevelFile));
-    result = LevelConfig.getArrayList("naves", nave.class);
-  }
-  catch(IOException | IllegalAccessException | InstantiationException e) {
-    e.printStackTrace();
-  }
-  return result;
-}
+
 abstract class MovibleObject{
   protected boolean delete = false;
   protected Integer x;
@@ -225,8 +238,9 @@ abstract class MovibleObject{
     return delete;
   }
   public void delete(){
-    clean();
     delete=true;
+    println("delete", this);
+    clean();
   }
 }
 enum Direction{
