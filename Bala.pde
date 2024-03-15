@@ -1,8 +1,13 @@
 public class Bala extends MovibleObject{
+  // indica si los jugadores son vulnerables a la bala
   private boolean playerVulnerable = false;
+  // si es hyper te quita 3 vidas en vez de solo una, ademas cambia su color a un naranja
   private boolean hyper = false;
+  // la distancia que tiene a otro objeto que lo lanza
   private int relay = 5;
+  // direcion de la bala
   private Direction direct = Direction.TOP;
+  // acion cuando la bala toca un objeto
   private Runnable onTouch = () -> {
     println("touched");
   };
@@ -19,10 +24,12 @@ public class Bala extends MovibleObject{
   public void setDirection(Direction direct){
     this.direct = direct;
   }
+  // mueve la bala sin velocidad
   public void move() {
     int BALA_MAXIMUM_DISTANCE = Integer.parseInt(propiedades.getProperty("bala.maximum.distance"));
     moveBala(BALA_MAXIMUM_DISTANCE);
   }
+  // actualiza la bala moviendola i vericiando si ha tocado algo
   private void moveBala(int BALA_MAXIMUM_DISTANCE) {
     boolean breaker = false;
     for (int i = 0; i <= BALA_MAXIMUM_DISTANCE; i++) {
@@ -39,6 +46,7 @@ public class Bala extends MovibleObject{
   public void hyperBala(){
     hyper=true;
   }
+  // verifica si a tocado algo
   private Boolean verifyNaveTouched(MovibleObject nav) {
     if(delete){  return false;} 
     // si la nave ya esta eliminada, pasar a otra
@@ -48,6 +56,7 @@ public class Bala extends MovibleObject{
       onTouch.run();
       println("for touch of", this);
       nav.delete();
+      // si es hyper intentar eliminarla otras dos vezes
       if(hyper) {nav.delete(); nav.delete();}
       this.delete();
       this.clean();
@@ -55,6 +64,7 @@ public class Bala extends MovibleObject{
     }
     return false;
   }
+  // verificar si quedan naves vivas
   private void verifyWin() {
     boolean totaldelated = true;
     for (Nave nave : Naves) {
@@ -65,26 +75,25 @@ public class Bala extends MovibleObject{
       game.win();
     }
   }
+  // vericicar si estan fuera del mapa
   private boolean isOut(){
     return (between(y, 0, width));
   }
+  // verificar si hay una bala en un objeto movible
   private boolean isInRadius(MovibleObject nav) {
-    //println("test", 40, 100, 0, between(40,0,100));
-    //println("x", x, nav.getX(), (nav.getX() + nav.getXSIZE()), between(x, nav.getX(), (nav.getX() + nav.getXSIZE())));
-    //println("y", y, nav.getY(), (nav.getY() + nav.getYSIZE()), between(y, nav.getY(), (nav.getY() + nav.getYSIZE())));
     return (between(x, nav.getX(), (nav.getX() + nav.getXSIZE())) && between(y, nav.getY(), (nav.getY() + nav.getYSIZE())));
-    //return (x >= nav.getX() && x <= (nav.getXSIZE() + nav.getX())) && (((y <= nav.getY() + nav.getYSIZE())));
   }
+  // verificar si un numero esta entre otro
   private boolean between(int valor, int pnt1, int pnt2){
     int p1 = (pnt1 < pnt2 ? pnt1 : pnt2);
     int p2 = (pnt1 > pnt2 ? pnt1 : pnt2);
-   // println("nimor",p1,"major",p2);
-    //println((p1 >= valor), (p2 <= valor));
     return (!(p1 >= valor) && !(p2 <= valor));
   }
+  // poner que el jugador sea vulnerable
   public void playerVulnerable(){
     playerVulnerable = true;
   }
+  // sobre escribir update para que incremente la posicion i si esta fuera del mapa eliminarla 
   @Override
   public void update() {
     clean();
@@ -97,10 +106,5 @@ public class Bala extends MovibleObject{
       this.clean();
       this.delete();
     }
-  }
-  @Override
-  public void show(){
-    println("showing", this);
-    super.show();
   }
 }

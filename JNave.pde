@@ -1,3 +1,4 @@
+// clase que su unico objetivo es parsearlo a json i vecebersa
 public class JNave{
     public boolean delated = false;
     public int x;
